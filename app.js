@@ -1,4 +1,4 @@
-(()=>{'use strict';const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+﻿(()=>{'use strict';const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 // Short cinematic intro with skip control.
 const intro=$('#intro'),shell=$('#siteShell'),bar=$('#loaderBar'),pct=$('#loaderPct'),loaderText=$('#loaderText');let progress=0,closed=false;
 function finishIntro(){if(closed)return;closed=true;intro.classList.add('hidden');shell.classList.add('ready');setTimeout(()=>intro.remove(),900)}
@@ -14,10 +14,78 @@ const sections=$$('main section[id]'),navLinks=$$('.nav-link');const navObserver
 $('#mobileMenu').addEventListener('click',()=>$('#mainNav').classList.toggle('open'));navLinks.forEach(a=>a.addEventListener('click',()=>$('#mainNav').classList.remove('open')));
 // Project filters.
 $$('.filter').forEach(btn=>btn.addEventListener('click',()=>{const filter=btn.dataset.filter;$$('.filter').forEach(b=>b.classList.toggle('active',b===btn));$$('.project-card').forEach(card=>{const cats=card.dataset.category.split(' ');card.classList.toggle('is-hidden',filter!=='all'&&!cats.includes(filter))})}));
-// Portfolio-only local chat helper; no API key / network calls.
-const panel=$('#chatPanel'),launcher=$('#chatLauncher'),messages=$('#chatMessages');function openChat(){panel.classList.add('open');panel.setAttribute('aria-hidden','false');$('#chatInput').focus()}function closeChat(){panel.classList.remove('open');panel.setAttribute('aria-hidden','true')}launcher.addEventListener('click',()=>panel.classList.contains('open')?closeChat():openChat());$('#closeChat').addEventListener('click',closeChat);
-const knowledge=[{keys:['graphmind','graph mind','graph'],answer:'GraphMind AI is one of Sudhakar’s AI-focused projects. It explores graph-oriented information and relationships. Open the repository from the Projects section to inspect the implementation.'},{keys:['careerbloom','career bloom','career'],answer:'CareerBloom AI is a career-guidance experience built around skill-gap insights, personalized roadmaps and daily progress. The project uses React, Tailwind CSS and Recharts.'},{keys:['predix','predict','outage','cloud'],answer:'Predix AI explores cloud outage prediction and cost impact using monitoring metrics, a dashboard and machine-learning ideas. The portfolio links to its GitHub repository.'},{keys:['rime','voice','assistant'],answer:'Rime AI Assistant is a voice-assistant project focused on real-time interaction, speech pipeline behavior and conversational flow.'},{keys:['skill','technology','tech stack','tools'],answer:'The portfolio highlights Generative AI, LLM concepts, RAG fundamentals, prompt engineering, AI agents, Python, FastAPI, React, TypeScript, Azure, Git, MongoDB, NumPy and Pandas. These represent a growing toolkit, not a claim of expert-level proficiency in every tool.'},{keys:['cert','ai-900','ai 900','az-900','az 900','dp-900','dp 900','microsoft'],answer:'The listed Microsoft fundamentals certifications are Azure AI Fundamentals (AI-900), Azure Fundamentals (AZ-900) and Azure Data Fundamentals (DP-900). Certificate images are linked in the Certifications section.'},{keys:['education','lpu','college','study'],answer:'Sudhakar is pursuing B.Tech in Computer Science and Engineering at Lovely Professional University in Phagwara, Punjab, with a Gen AI integrated with Microsoft focus. The expected course period shown here is 2024–2028.'},{keys:['contact','email','linkedin','github','hire','internship','opportunity'],answer:'You can connect through the LinkedIn and GitHub buttons or use the Email Me button in the Contact section. Sudhakar is interested in Gen AI projects, internships and collaboration.'},{keys:['job','smart job','portal'],answer:'Smart Job Application is a full-stack job portal project concept with job listings, authentication and application management, using React, Node.js, MongoDB and TypeScript.'},{keys:['food','share'],answer:'Food Share Angels is a community-focused food-sharing web project built with React and Vite.'},{keys:['about','goal','dream','gen ai engineer','generative ai'],answer:'Sudhakar’s goal is to become a Generative AI Engineer who can build useful, reliable AI products. His current focus includes RAG, AI agents, APIs, cloud deployment and core CS fundamentals.'}];
-function reply(q){const low=q.toLowerCase();const hit=knowledge.find(k=>k.keys.some(key=>low.includes(key)));return hit?hit.answer:'I can help with Sudhakar’s projects, skills, certifications, education or career goals. Try asking about GraphMind AI, CareerBloom AI, Rime AI, Microsoft certifications, or contact details.'}
-function addBubble(text,who){const b=document.createElement('div');b.className='chat-bubble '+who;b.textContent=text;messages.appendChild(b);messages.scrollTop=messages.scrollHeight}
-function sendQuestion(q){q=q.trim();if(!q)return;addBubble(q,'user');$('#chatInput').value='';setTimeout(()=>addBubble(reply(q),'bot'),260)}$('#chatForm').addEventListener('submit',e=>{e.preventDefault();sendQuestion($('#chatInput').value)});$$('.chat-suggestions button').forEach(b=>b.addEventListener('click',()=>sendQuestion(b.dataset.question)));
+})();/* Contact copy buttons: green Copied! feedback for 2 seconds */
+document.addEventListener("click", async function (event) {
+  const button = event.target.closest(".contact-copy");
+  if (!button) return;
+
+  const value = button.dataset.copy;
+  if (!value) return;
+
+  const originalHTML = button.innerHTML;
+  const originalTitle = button.title;
+  const originalLabel = button.getAttribute("aria-label");
+
+  try {
+    await navigator.clipboard.writeText(value);
+
+    button.innerHTML = "Copied!";
+    button.style.setProperty("color", "#52e5a5", "important");
+    button.style.setProperty("border-color", "#52e5a5", "important");
+    button.style.setProperty("background", "#52e5a51a", "important");
+    button.style.width = "auto";
+    button.style.minWidth = "76px";
+    button.style.padding = "0 10px";
+    button.style.fontSize = "11px";
+    button.style.fontWeight = "700";
+    button.title = "Copied!";
+    button.setAttribute("aria-label", "Copied!");
+
+    setTimeout(() => {
+      button.innerHTML = originalHTML;
+      button.style.removeProperty("color");
+      button.style.removeProperty("border-color");
+      button.style.removeProperty("background");
+      button.style.removeProperty("width");
+      button.style.removeProperty("min-width");
+      button.style.removeProperty("padding");
+      button.style.removeProperty("font-size");
+      button.style.removeProperty("font-weight");
+      button.title = originalTitle;
+
+      if (originalLabel) {
+        button.setAttribute("aria-label", originalLabel);
+      } else {
+        button.removeAttribute("aria-label");
+      }
+    }, 2000);
+  } catch (error) {
+    window.prompt("Copy this contact detail:", value);
+  }
+});
+
+
+// Public profile statistics for the portfolio.
+(async function loadSocialStats() {
+  const status = document.getElementById('statsStatus');
+
+  try {
+    const response = await fetch('https://api.github.com/users/SudhakarNabhigari');
+    if (!response.ok) throw new Error('GitHub API unavailable');
+
+    const data = await response.json();
+
+    document.getElementById('githubRepos').textContent = data.public_repos ?? '--';
+    document.getElementById('githubFollowers').textContent = data.followers ?? '--';
+    document.getElementById('githubFollowing').textContent = data.following ?? '--';
+    document.getElementById('githubGists').textContent = data.public_gists ?? '--';
+
+    if (status) {
+      status.textContent = 'GitHub figures are loaded from the public profile API. LinkedIn statistics require authorized access.';
+    }
+  } catch (error) {
+    if (status) {
+      status.textContent = 'GitHub statistics are temporarily unavailable. Open the profile links to view current figures.';
+    }
+  }
 })();
